@@ -1,0 +1,66 @@
+# Roost shared pre-commit hooks.
+#
+# Every hook declares explicit `stages:` — never rely on stage defaults.
+# Upstream hooks that declare multi-stage `stages` override a consumer's
+# `default_stages` and leak file-rewriting hooks into the pre-push stage
+# (hit in S-565, PR #252). Roost consumers install pre-push hooks for the
+# local CI gate, so all file hooks here are pinned to [pre-commit] and
+# commitlint to [commit-msg].
+
+- id: gitleaks
+  name: gitleaks (shared-config)
+  description: Scan staged changes for hardcoded secrets with the shared Roost gitleaks baseline.
+  entry: bin/run-gitleaks
+  language: script
+  pass_filenames: false
+  # The scan covers the whole staged change, so it must run even when every
+  # staged path is excluded by the consumer's filters (S-1154).
+  always_run: true
+  stages: [pre-commit]
+  minimum_pre_commit_version: 3.2.0
+
+- id: ruff
+  name: ruff check (shared-config)
+  description: Lint Python with the shared Roost ruff baseline (ruff.toml).
+  entry: bin/run-ruff
+  language: script
+  types_or: [python, pyi]
+  require_serial: true
+  stages: [pre-commit]
+  minimum_pre_commit_version: 3.2.0
+
+- id: ruff-format
+  name: ruff format (shared-config)
+  description: Format Python with the shared Roost ruff baseline (ruff.toml).
+  entry: bin/run-ruff-format
+  language: script
+  types_or: [python, pyi]
+  require_serial: true
+  stages: [pre-commit]
+  minimum_pre_commit_version: 3.2.0
+
+- id: prettier
+  name: prettier (shared-config)
+  description: Format JS/TS/JSX/TSX, CSS/SCSS, JSON, YAML, Markdown, and HTML with the shared Roost Prettier baseline.
+  entry: shared-config-prettier
+  language: node
+  types_or: [javascript, jsx, ts, tsx, css, scss, json, yaml, markdown, html]
+  stages: [pre-commit]
+  minimum_pre_commit_version: 3.2.0
+
+- id: file-hygiene
+  name: file hygiene (shared-config)
+  description: Trailing whitespace, end-of-file, merge-conflict, YAML/JSON validity, and large-file checks.
+  entry: bin/run-file-hygiene
+  language: script
+  types: [file]
+  stages: [pre-commit]
+  minimum_pre_commit_version: 3.2.0
+
+- id: commitlint
+  name: commitlint (shared-config)
+  description: Validate the commit message against the shared Conventional Commits config.
+  entry: shared-config-commitlint
+  language: node
+  stages: [commit-msg]
+  minimum_pre_commit_version: 3.2.0

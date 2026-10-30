@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# shared-config `file-hygiene` hook: generic file checks (trailing whitespace,
+# end-of-file, merge-conflict markers, YAML/JSON validity, large files).
+# Requires python3 with PyYAML on PATH (see README "Prerequisites").
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "shared-config/file-hygiene: 'python3' not found on PATH." >&2
+  exit 1
+fi
+
+exec python3 "$HOOK_DIR/bin/file_hygiene.py" "$@"

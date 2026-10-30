@@ -1,0 +1,41 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# JavaScript, TypeScript, JSON, YAML, CSS, HTML
+[*.{js,jsx,ts,tsx,cts,mts,json,yml,yaml,css,scss,html,astro}]
+indent_style = space
+indent_size = 2
+max_line_length = 120
+
+# Markdown files
+[*.{md,mdx}]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false
+max_line_length = 120
+
+# Python files (matches the shared ruff.toml: line length 100)
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# Go files
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# Rust files
+[*.rs]
+indent_style = space
+indent_size = 4
+max_line_length = 100

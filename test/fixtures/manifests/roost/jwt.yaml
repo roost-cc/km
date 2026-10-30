@@ -1,0 +1,21 @@
+service: jwt-keypairs
+publishers:
+  infisical:
+    dev:
+      account_private_key: /jwt/account/private_key
+      bot_private_key: /jwt/bot/private_key
+rotation:
+  runbook: runbooks/example.md
+  groups:
+    account-private-key:
+      max_age_days: 90
+      producer: ed25519
+      secrets:
+        - name: account_private_key
+          format: ed25519
+    bot-private-key:
+      max_age_days: 90
+      producer: ed25519
+      secrets:
+        - name: bot_private_key
+          format: ed25519

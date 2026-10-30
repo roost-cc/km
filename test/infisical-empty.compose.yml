@@ -1,0 +1,48 @@
+# A throwaway Infisical with an empty database, for test/ensure_int_test.py.
+#
+# The test runs it under its own compose project name (`-p km-ensure-<pid>`)
+# with KM_ENSURE_PORT set to a free port and the instance's keys minted
+# for the run, and removes it with its volumes (`down -v`) on teardown.
+name: km-ensure
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: infisical
+      POSTGRES_PASSWORD: infisical
+      POSTGRES_DB: infisical
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U infisical']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli ping']
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  infisical:
+    image: infisical/infisical:v0.165.16
+    environment:
+      # Minted per run by the test (16 random bytes hex; 32 random bytes base64).
+      ENCRYPTION_KEY: ${KM_ENSURE_ENCRYPTION_KEY:?set by test/ensure_int_test.py}
+      AUTH_SECRET: ${KM_ENSURE_AUTH_SECRET:?set by test/ensure_int_test.py}
+      DB_CONNECTION_URI: postgresql://infisical:infisical@postgres:5432/infisical
+      REDIS_URL: redis://redis:6379
+      SITE_URL: http://localhost:${KM_ENSURE_PORT:-18888}
+      NODE_ENV: production
+      TELEMETRY_ENABLED: 'false'
+    ports:
+      - '127.0.0.1:${KM_ENSURE_PORT:-18888}:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy

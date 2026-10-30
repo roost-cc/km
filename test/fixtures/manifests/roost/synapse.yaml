@@ -1,0 +1,24 @@
+service: synapse
+publishers:
+  infisical:
+    dev:
+      as_token: /bot/as_token
+      hs_token: /bot/hs_token
+      shared_secret: /matrix/shared_secret
+rotation:
+  runbook: runbooks/example.md
+  groups:
+    synapse-bot:
+      max_age_days: 90
+      producer: passphrase
+      secrets:
+        - name: as_token
+          format: { length: 32 }
+        - name: hs_token
+          format: { length: 32 }
+    shared-secret:
+      max_age_days: 90
+      producer: passphrase
+      secrets:
+        - name: shared_secret
+          format: { length: 32 }

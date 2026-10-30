@@ -1,0 +1,89 @@
+# Project-relative directories. Omit any key to inherit the convention
+# (manifests/, producers/, publishers/, runbooks/, templates/, targets/).
+# `accounts` is retired: a login is its manifest's `login:`. `files` is
+# retired: rendered files land under each template_file destination's `root:`.
+directories:
+  manifests: manifests
+  producers: producers
+  publishers: publishers
+  runbooks: runbooks
+  templates: templates # ${var} templates consumed by template_file live here
+  targets: targets # per-target values: targets/<target>.yaml
+
+# The application's deployment environments, declared once.
+environments: [dev, test]
+
+# Targets: each lists the manifests it publishes (`manifests:`, by slug: the
+# file stem of manifests/<slug>.yaml; required, non-empty, every slug must
+# name a manifest) and an ordered list of `destinations:`. Each destination
+# names a publisher, the environments it accepts, and carries the
+# publisher's whole configuration (nothing is inherited). Destinations run
+# in order. Targets sharing manifests list the same slugs; per-instance
+# values (project ids, tokens) live in targets/<target>.yaml.
+targets:
+  local:
+    manifests: [infisical, jwt, postgresql, synapse]
+    destinations:
+      # Rendered files land under `root` (required; absolute after $VAR
+      # expansion, or ./-relative to this file), outside every repo.
+      - publisher: template_file
+        envs: [dev]
+        root: $HOME/secrets
+      - publisher: infisical
+        host: http://localhost:8888
+        envs: [dev, test]
+        # What `ensure` creates on an empty instance: the instance admin and
+        # organisation (bootstrap), then the project.
+        admin_email: admin@example.com
+        org_name: Example Org
+        project_name: example-app
+        # Where `ensure` also records the project id and the services' token,
+        # as per-target manifest values (`<slug>:<secret>`), for templates.
+        values:
+          project_id: infisical:secret_manager_project
+          services_token: infisical:secret_manager_token
+      - publisher: postgresql
+        envs: [dev]
+        dev:
+          host: localhost
+          port: 5432
+          database: postgres
+          user: postgres
+          password: postgres
+      # Synapse's yaml files: rendered by template_file above, their secret
+      # nodes set in place (addressed `<key>:<JSONPath>` in the manifest),
+      # then the reload command runs as `apply` (optional).
+      - publisher: yaml_file
+        envs: [dev]
+        files:
+          homeserver: $HOME/secrets/synapse/homeserver.{env}.yaml
+          appservice: $HOME/secrets/synapse/app-bot.{env}.yaml
+        apply:
+          - docker
+          - compose
+          - '-f'
+          - $HOME/stack/docker-compose.yml
+          - restart
+          - synapse
+      # A `producer:` entry carries a producer's configuration; it is not a
+      # destination.
+      - producer: aws_iam
+        aws_profile: example-admin
+  # A remote target: template_file writes each file to `remote_dir` through
+  # `transport` (a command that runs its one argument as a shell command on
+  # the target), then runs `apply`. Nothing is written locally, and `root`
+  # is not allowed.
+  staging:
+    manifests: [infisical, jwt, postgresql, synapse]
+    destinations:
+      - publisher: template_file
+        envs: [dev]
+        transport: [ssh, deploy@staging.example.com]
+        remote_dir: /home/deploy/secrets
+        apply:
+          - ssh
+          - deploy@staging.example.com
+          - systemctl
+          - --user
+          - restart
+          - app-stack

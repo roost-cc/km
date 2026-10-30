@@ -1,0 +1,86 @@
+# <Vendor Name>
+#
+# <!-- KEEP:open -->
+# Operational context that isn't in the runbook. Account identifier, gotchas,
+# shared-access notes, historical incident references. Kept across
+# regenerations by build-vendors.py. The runbook (see rotation.runbook below)
+# owns the dashboard URL and key-acquisition instructions.
+# <!-- KEEP:close -->
+#
+# Two manifest shapes:
+#
+#   1. Rotation-bearing (this template) — `secrets:` + `infisical:` +
+#      `rotation:`, with each group declaring a `producer:` (typically
+#      `interactive` for vendor dashboards, or a registered minting
+#      producer like `ed25519`/`uuid`/`passphrase`/`base64-32`).
+#   2. Login-only — one console or vendor login: `login:` (url, id, mfa),
+#      `notes:`, `secrets.password` and its rotation group. No
+#      `publishers:`, and no target lists it.
+
+service: example
+
+# Optional: the login used to rotate these credentials. Either
+# `from: <slug>` alone, naming the manifest that holds the login (e.g.
+# `example-user`), or inline keys, each a string:
+#   url: https://example.com/login   # opened by the interactive producer
+#   id: vendor-login@example.com
+#   mfa: <base32 TOTP secret>        # used to derive rotating codes
+# An inline login's password is this manifest's `secrets.password`.
+# During rotation the `interactive` producer opens `url` and shows the
+# `km login` menu, which copies `id`, `password` or a fresh TOTP from
+# `mfa` on keypress, then prompts for the new value(s).
+login:
+  from: example-user
+
+# Optional: anything else about the account (backup codes, SSO settings,
+# hints). km never reads it.
+notes: {}
+
+# Every secret this vendor owns, by local name. Values are scalars.
+# If a secret needs different VALUES per env, give each env its own
+# locally-unique name (e.g. `client_id_dev`, `client_id_prod`) and map
+# each to the appropriate env in `infisical:` below.
+# Multi-line scalars (PEM, JWT) use YAML block scalar syntax:
+#   key: |
+#     -----BEGIN PRIVATE KEY-----
+#     ...
+#     -----END PRIVATE KEY-----
+secrets: {}
+publishers:
+  infisical:
+    dev: {}
+    test: {}
+    staging: {}
+    prod: {}
+
+rotation:
+  runbook: runbooks/rotate-vendor-api-key.md#example
+  # Secrets rotate together in groups. Typical groups:
+  #   <vendor>-static  — identifiers that never rotate (max_age_days: 0)
+  #   <vendor>-default — everything else with the vendor's default cadence
+  #   <named>          — e.g. "<vendor>-key" when key_id + key rotate together
+  #
+  # Group names must be unique across all manifests; prefixing with the
+  # vendor name (or another file-local discriminator) is the simplest way
+  # to avoid cross-file collisions. Singleton groups (one secret) are
+  # automatically keyed as `<path>:<name>` by the loader; the yaml group
+  # name is informational only in that case.
+  #
+  # `producer:` registers which module under `km/producers/` rotates this
+  # group. Operator-driven vendor rotation uses `producer: interactive`
+  # (login menu + paste-back). `static` is a no-op (preserves current
+  # values). Auto-minting producers like `ed25519`/`uuid`/`passphrase`/
+  # `base64-32` rotate programmatically. Each `secrets[]` entry is `{name}`.
+  groups:
+    example-static:
+      max_age_days: 0
+      last_rotated:
+      producer: static
+      secrets:
+        - name: example_static_secret
+    example-default:
+      max_age_days: 365
+      last_rotated:
+      producer: interactive
+      secrets:
+        - name: example_default_secret

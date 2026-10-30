@@ -1,0 +1,21 @@
+# gitleaks config — keep the default ruleset, allowlist a handful of
+# known-safe PEM-header string literals in this repo's tests/templates.
+#
+# Run with:  gitleaks detect --redact
+# (no --no-git: that walks the working tree and would re-flag .venv/
+# and __pycache__/ noise. The git-walk respects .gitignore.)
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "PEM header literals used as string constants, not real keys"
+# Match by basename so renames/moves in history (tools/ → root,
+# pipelines/ → producers/, .js → .py) stay covered.
+paths = [
+  '''(^|/)manifest_template\.yaml$''',
+  '''(^|/)ed25519_unit_test\.py$''',
+  '''(^|/)rotate_unit_test\.py$''',
+  '''(^|/)roost_unit_test\.py$''',
+  '''(^|/)roost\.unit\.test\.js$''',
+]

@@ -1,0 +1,14 @@
+.venv/
+reports/
+logs/
+__pycache__/
+*.pyc
+*.egg-info/
+node_modules/
+config.yaml
+docs/test/
+test/.env
+
+# Backlog workon lock files and activity logs
+.workon.lock
+.bl/

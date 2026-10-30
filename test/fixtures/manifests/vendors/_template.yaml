@@ -1,0 +1,11 @@
+# Template — must be skipped by loader
+vendor: example
+publishers:
+  infisical: {}
+rotation:
+  runbook: runbooks/example.md
+  groups:
+    example-default:
+      max_age_days: 365
+      producer: vendor
+      secrets: []

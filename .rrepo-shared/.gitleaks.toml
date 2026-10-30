@@ -1,0 +1,11 @@
+# Roost shared gitleaks baseline.
+#
+# Extends the built-in default ruleset with NO broad allowlists. Repo-specific
+# false positives stay in the consumer repo (via pre-commit `exclude:` or a
+# consumer-local gitleaks allowlist) until a finding is proven globally safe —
+# only then does an allowlist entry graduate into this file.
+
+title = "roost shared-config gitleaks baseline"
+
+[extend]
+useDefault = true

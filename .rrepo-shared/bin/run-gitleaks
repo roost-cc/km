@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# shared-config `gitleaks` hook: scan staged changes with the shared Roost config.
+# Requires the gitleaks binary on PATH (see README "Prerequisites").
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+CONFIG="$HOOK_DIR/.gitleaks.toml"
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "shared-config/gitleaks: 'gitleaks' not found on PATH." >&2
+  echo "Install it first: 'apt install gitleaks', 'brew install gitleaks', or" >&2
+  echo "https://github.com/gitleaks/gitleaks#installing" >&2
+  exit 1
+fi
+
+# gitleaks >= 8.19 replaced `protect --staged` with `git --pre-commit --staged`.
+# Support both so consumers can use either a distro package or a recent release.
+if gitleaks git --help >/dev/null 2>&1; then
+  exec gitleaks git --pre-commit --staged --redact --no-banner --config "$CONFIG"
+else
+  exec gitleaks protect --staged --redact --no-banner --config "$CONFIG"
+fi

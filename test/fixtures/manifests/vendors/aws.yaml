@@ -1,0 +1,4 @@
+# A vendor entry without rotation.groups — loader should skip silently
+vendor: aws
+login:
+  id: aws-admin

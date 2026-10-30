@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# shared-config `ruff-format` hook: format Python files with the shared Roost baseline.
+# Requires the ruff binary on PATH (see README "Prerequisites").
+set -euo pipefail
+
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+if ! command -v ruff >/dev/null 2>&1; then
+  echo "shared-config/ruff-format: 'ruff' not found on PATH." >&2
+  echo "Install it first: 'uv tool install ruff', 'pipx install ruff', or" >&2
+  echo "https://docs.astral.sh/ruff/installation/" >&2
+  exit 1
+fi
+
+exec ruff format --force-exclude --config "$HOOK_DIR/ruff.toml" "$@"

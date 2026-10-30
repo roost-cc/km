@@ -1,0 +1,14 @@
+# Roost shared Python baseline (carried forward from km's [tool.ruff]).
+# Consumed by the `ruff` and `ruff-format` hooks via bin/run-ruff{,-format},
+# which pass this file with an explicit --config flag so it always wins over
+# consumer-repo config discovery.
+
+line-length = 100
+target-version = "py312"
+
+[format]
+quote-style = "double"
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]

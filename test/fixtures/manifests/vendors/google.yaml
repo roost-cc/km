@@ -1,0 +1,21 @@
+service: google
+secrets:
+  client_id: test-client-id
+  client_secret: test-client-secret
+  dev_apikey: test-dev-apikey
+publishers:
+  infisical:
+    dev:
+      client_id: /oauth_client/google/client_id
+      client_secret: /oauth_client/google/client_secret
+rotation:
+  runbook: runbooks/example.md
+  groups:
+    google:
+      max_age_days: 365
+      last_rotated: null
+      producer: vendor
+      secrets:
+        - name: client_id
+        - name: client_secret
+        - name: dev_apikey # local-only — no infisical entry, loader skips

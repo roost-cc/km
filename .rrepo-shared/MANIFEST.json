@@ -1,0 +1,18 @@
+{
+  "source": "roost-cc/shared-config",
+  "rev": "v0.1.2",
+  "files": [
+    ".gitleaks.toml",
+    ".pre-commit-hooks.yaml",
+    "bin/file_hygiene.py",
+    "bin/run-commitlint.js",
+    "bin/run-file-hygiene",
+    "bin/run-gitleaks",
+    "bin/run-prettier.js",
+    "bin/run-ruff",
+    "bin/run-ruff-format",
+    "commitlint.config.cjs",
+    "prettier.config.cjs",
+    "ruff.toml"
+  ]
+}
